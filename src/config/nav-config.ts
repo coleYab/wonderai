@@ -4,7 +4,7 @@ export const navGroups: NavGroup[] = [
   {
     label: '',
     items: [
-     {
+      {
         title: 'Trips',
         url: '/dashboard/trips',
         icon: 'mapPin',
@@ -29,7 +29,7 @@ export const navGroups: NavGroup[] = [
       //   shortcut: ['d', 'd'],
       //   items: []
       // },
- 
+
       {
         title: 'Rewards',
         url: '/dashboard/rewards',

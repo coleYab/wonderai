@@ -355,7 +355,7 @@ export const EVENT_CATALOG = {
     },
     {
       id: 'vil_005',
-      title: "Artisan Textile Weaving",
+      title: 'Artisan Textile Weaving',
       description: "Watch and try your hand at weaving traditional Ethiopian 'Gabi' cloth.",
       category: 'activity',
       price_etb: 500,
@@ -380,7 +380,8 @@ export const EVENT_CATALOG = {
     {
       id: 'vil_008',
       title: 'Coffee Roasting Masterclass',
-      description: 'Deep dive into the history, sorting, roasting, and brewing of Ethiopian coffee.',
+      description:
+        'Deep dive into the history, sorting, roasting, and brewing of Ethiopian coffee.',
       category: 'activity',
       price_etb: 600,
       reward: 70

@@ -48,7 +48,13 @@ export default function AppSidebar() {
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
                   <div className='flex size-8 items-center justify-center'>
-                    <Image src='/icon.png' alt='Wonder AI' width={24} height={24} className='size-6 object-contain' />
+                    <Image
+                      src='/icon.png'
+                      alt='Wonder AI'
+                      width={24}
+                      height={24}
+                      className='size-6 object-contain'
+                    />
                   </div>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-semibold'>Wonder AI</span>
@@ -63,10 +69,18 @@ export default function AppSidebar() {
                 side='bottom'
                 sideOffset={4}
               >
-                <DropdownMenuLabel className='text-muted-foreground text-xs'>Organization</DropdownMenuLabel>
+                <DropdownMenuLabel className='text-muted-foreground text-xs'>
+                  Organization
+                </DropdownMenuLabel>
                 <DropdownMenuItem>
                   <div className='mr-2 flex size-5 items-center justify-center'>
-                    <Image src='/icon.png' alt='Wonder AI' width={16} height={16} className='size-4 object-contain' />
+                    <Image
+                      src='/icon.png'
+                      alt='Wonder AI'
+                      width={16}
+                      height={16}
+                      className='size-4 object-contain'
+                    />
                   </div>
                   <span>{activeOrganization}</span>
                 </DropdownMenuItem>

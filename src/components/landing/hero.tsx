@@ -114,9 +114,7 @@ export default function HeroSection() {
             height={28}
             className='size-7 object-contain'
           />
-          <span className='text-base font-semibold tracking-tight text-foreground'>
-            Wonder AI
-          </span>
+          <span className='text-base font-semibold tracking-tight text-foreground'>Wonder AI</span>
         </Link>
 
         <div
@@ -184,13 +182,11 @@ export default function HeroSection() {
         </button>
       </motion.nav>
 
-      <motion.div
-        initial='hidden'
-        animate='visible'
-        variants={stagger}
-        className='relative z-10'
-      >
-        <motion.div variants={scaleIn} className='mx-auto mt-40 flex w-max items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 md:mt-32'>
+      <motion.div initial='hidden' animate='visible' variants={stagger} className='relative z-10'>
+        <motion.div
+          variants={scaleIn}
+          className='mx-auto mt-40 flex w-max items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 md:mt-32'
+        >
           <motion.span
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -211,9 +207,8 @@ export default function HeroSection() {
           variants={fadeUp}
           className='mx-auto mt-6 max-w-2xl px-2 text-center text-sm text-muted-foreground md:px-0 md:text-base'
         >
-          A visually intelligent, self-updating travel assistant designed for modern
-          hospitality experiences. Transform travel from a static checklist into a
-          living, guided experience.
+          A visually intelligent, self-updating travel assistant designed for modern hospitality
+          experiences. Transform travel from a static checklist into a living, guided experience.
         </motion.p>
 
         <motion.div

@@ -20,13 +20,13 @@
 
 ## Core Experience
 
-| Stage | Description |
-| :---- | :---------- |
-| **1. Interactive Discovery** | A guided flow captures dates, budget, interests, and must-see places. In moments, it builds a clean itinerary you can trust. |
-| **2. Visual Roadmap** | Your itinerary appears as a synced list and map. Tap any stop and jump there instantly with a smooth camera move. |
-| **3. Live Interaction** | Start your journey once, and the assistant takes over. It syncs to your calendar and helps you at the right moment. |
-| **4. Reward Loop** | Each completed stop earns coins. Guests redeem perks, upgrades, and surprise rewards as they move through the plan. |
-| **5. Autonomous Journey Planning** | Planning, navigation, and live guidance work together in one seamless flow. Guests enjoy more and stress less. |
+| Stage                              | Description                                                                                                                  |
+| :--------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| **1. Interactive Discovery**       | A guided flow captures dates, budget, interests, and must-see places. In moments, it builds a clean itinerary you can trust. |
+| **2. Visual Roadmap**              | Your itinerary appears as a synced list and map. Tap any stop and jump there instantly with a smooth camera move.            |
+| **3. Live Interaction**            | Start your journey once, and the assistant takes over. It syncs to your calendar and helps you at the right moment.          |
+| **4. Reward Loop**                 | Each completed stop earns coins. Guests redeem perks, upgrades, and surprise rewards as they move through the plan.          |
+| **5. Autonomous Journey Planning** | Planning, navigation, and live guidance work together in one seamless flow. Guests enjoy more and stress less.               |
 
 ---
 
@@ -43,19 +43,19 @@
 
 ## Tech Stack
 
-| Category | Technology |
-| :------- | :--------- |
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5.7 (strict) |
-| Styling | Tailwind CSS v4 |
-| UI Components | shadcn/ui (New York style) |
-| Authentication | Clerk |
-| State Management | Zustand 5 |
-| Data Fetching | TanStack React Query |
-| Forms | TanStack Form + Zod |
-| Charts | Recharts |
-| Maps | Leaflet / Mapbox |
-| Error Tracking | Sentry |
+| Category         | Technology                 |
+| :--------------- | :------------------------- |
+| Framework        | Next.js 16 (App Router)    |
+| Language         | TypeScript 5.7 (strict)    |
+| Styling          | Tailwind CSS v4            |
+| UI Components    | shadcn/ui (New York style) |
+| Authentication   | Clerk                      |
+| State Management | Zustand 5                  |
+| Data Fetching    | TanStack React Query       |
+| Forms            | TanStack Form + Zod        |
+| Charts           | Recharts                   |
+| Maps             | Leaflet / Mapbox           |
+| Error Tracking   | Sentry                     |
 
 ---
 

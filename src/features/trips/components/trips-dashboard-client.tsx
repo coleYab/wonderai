@@ -37,7 +37,6 @@ type ConciergeStep = {
   multiple: boolean;
 };
 
-
 const STEPS: ConciergeStep[] = [
   {
     id: 'logistics_dates',
@@ -240,7 +239,8 @@ export function TripsDashboardClient() {
       });
 
       if (!response.ok) {
-        throw new Error('Trip generation failed. Please try again.');
+        const errorData = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorData?.error || 'Trip generation failed. Please try again.');
       }
 
       const payload = (await response.json()) as {
@@ -259,7 +259,9 @@ export function TripsDashboardClient() {
       const travelDates = getSingle(selections, 'logistics_dates') || 'Specific Dates Later';
 
       const resolvedPlaces =
-        payload.places && payload.places.length > 0 ? payload.places : DEFAULT_TRIP_PLACES.slice(0, 4);
+        payload.places && payload.places.length > 0
+          ? payload.places
+          : DEFAULT_TRIP_PLACES.slice(0, 4);
 
       const newTrip: TripListItem = {
         id: `custom-${now.getTime()}`,
@@ -288,7 +290,8 @@ export function TripsDashboardClient() {
       resetFlow();
       router.push(`/dashboard/trips/${newTrip.id}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Trip generation failed. Please try again.';
+      const message =
+        error instanceof Error ? error.message : 'Trip generation failed. Please try again.';
       setGenerationError(message);
     } finally {
       setIsGenerating(false);
@@ -314,124 +317,127 @@ export function TripsDashboardClient() {
       ) : null}
 
       <Dialog open={isOpen} onOpenChange={openDialog}>
-          <DialogContent className='max-h-[90dvh] overflow-y-auto sm:max-w-2xl'>
-            <DialogHeader>
-              <DialogTitle>Create a new trip</DialogTitle>
-              <DialogDescription>
-                Answer each step to generate a trip draft. Your draft is saved locally in this browser.
-              </DialogDescription>
-            </DialogHeader>
+        <DialogContent className='max-h-[90dvh] overflow-y-auto sm:max-w-2xl'>
+          <DialogHeader>
+            <DialogTitle>Create a new trip</DialogTitle>
+            <DialogDescription>
+              Answer each step to generate a trip draft. Your draft is saved locally in this
+              browser.
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className='space-y-4'>
-              <div className='flex items-center justify-between text-xs text-muted-foreground'>
-                <span>
-                  Step {currentStep + 1} of {totalSteps}
-                </span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} />
-
-              {isNotesStep ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className='flex items-center gap-2 text-base'>
-                      <Icons.sparkles className='h-4 w-4' />
-                      Final Notes
-                    </CardTitle>
-                    <CardDescription>
-                      Optional: add extra context, requests, or accessibility preferences.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea
-                      value={finalNotes}
-                      onChange={(event) => setFinalNotes(event.target.value)}
-                      rows={6}
-                      placeholder='Example: We want a surprise anniversary dinner and minimal walking.'
-                    />
-
-                    {generationError ? (
-                      <p className='mt-3 text-xs text-red-500'>{generationError}</p>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className='flex items-center gap-2 text-base'>
-                      {ActiveStepIcon ? <ActiveStepIcon className='h-4 w-4' /> : null}
-                      {activeStep?.title}
-                    </CardTitle>
-                    <CardDescription>{activeStep?.subtitle}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='grid gap-2 sm:grid-cols-2'>
-                      {activeStep?.options.map((option) => {
-                        const selected = Boolean(selections[activeStep.id]?.includes(option));
-
-                        return (
-                          <div
-                            key={option}
-                            role='button'
-                            tabIndex={0}
-                            onClick={() => handleSelect(option)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ' ') {
-                                event.preventDefault();
-                                handleSelect(option);
-                              }
-                            }}
-                            className={cn(
-                              'flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
-                              selected
-                                ? 'border-primary bg-primary/10 text-primary'
-                                : 'hover:bg-accent hover:text-accent-foreground'
-                            )}
-                          >
-                            <span>{option}</span>
-                            {activeStep.multiple ? (
-                              <Checkbox checked={selected} className='pointer-events-none' />
-                            ) : selected ? (
-                              <Icons.check className='h-4 w-4' />
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {activeStep?.multiple ? (
-                      <p className='text-muted-foreground mt-3 text-xs'>You can select multiple options.</p>
-                    ) : null}
-
-                    {generationError ? (
-                      <p className='mt-3 text-xs text-red-500'>{generationError}</p>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              )}
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between text-xs text-muted-foreground'>
+              <span>
+                Step {currentStep + 1} of {totalSteps}
+              </span>
+              <span>{Math.round(progress)}%</span>
             </div>
+            <Progress value={progress} />
 
-            <DialogFooter>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={handleBack}
-                disabled={currentStep === 0 || isGenerating}
-              >
-                Back
-              </Button>
-              <Button
-                type='button'
-                onClick={handleContinue}
-                disabled={!canContinue || isGenerating}
-                isLoading={isGenerating}
-              >
-                {isNotesStep ? 'Create Trip' : 'Continue'}
-                <Icons.arrowRight className='h-4 w-4' />
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            {isNotesStep ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2 text-base'>
+                    <Icons.sparkles className='h-4 w-4' />
+                    Final Notes
+                  </CardTitle>
+                  <CardDescription>
+                    Optional: add extra context, requests, or accessibility preferences.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    value={finalNotes}
+                    onChange={(event) => setFinalNotes(event.target.value)}
+                    rows={6}
+                    placeholder='Example: We want a surprise anniversary dinner and minimal walking.'
+                  />
+
+                  {generationError ? (
+                    <p className='mt-3 text-xs text-red-500'>{generationError}</p>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2 text-base'>
+                    {ActiveStepIcon ? <ActiveStepIcon className='h-4 w-4' /> : null}
+                    {activeStep?.title}
+                  </CardTitle>
+                  <CardDescription>{activeStep?.subtitle}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid gap-2 sm:grid-cols-2'>
+                    {activeStep?.options.map((option) => {
+                      const selected = Boolean(selections[activeStep.id]?.includes(option));
+
+                      return (
+                        <div
+                          key={option}
+                          role='button'
+                          tabIndex={0}
+                          onClick={() => handleSelect(option)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              handleSelect(option);
+                            }
+                          }}
+                          className={cn(
+                            'flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
+                            selected
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'hover:bg-accent hover:text-accent-foreground'
+                          )}
+                        >
+                          <span>{option}</span>
+                          {activeStep.multiple ? (
+                            <Checkbox checked={selected} className='pointer-events-none' />
+                          ) : selected ? (
+                            <Icons.check className='h-4 w-4' />
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {activeStep?.multiple ? (
+                    <p className='text-muted-foreground mt-3 text-xs'>
+                      You can select multiple options.
+                    </p>
+                  ) : null}
+
+                  {generationError ? (
+                    <p className='mt-3 text-xs text-red-500'>{generationError}</p>
+                  ) : null}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={handleBack}
+              disabled={currentStep === 0 || isGenerating}
+            >
+              Back
+            </Button>
+            <Button
+              type='button'
+              onClick={handleContinue}
+              disabled={!canContinue || isGenerating}
+              isLoading={isGenerating}
+            >
+              {isNotesStep ? 'Create Trip' : 'Continue'}
+              <Icons.arrowRight className='h-4 w-4' />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {trips.length > 0 ? (
         <div className='grid gap-4 md:grid-cols-2'>
@@ -468,31 +474,26 @@ export function TripsDashboardClient() {
           })}
         </div>
       ) : (
-   <div className="border-none py-10">
-  <div className="text-center space-y-4">
-    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-      <Icons.mapPin className="h-6 w-6 text-muted-foreground" />
-    </div>
+        <div className='border-none py-10'>
+          <div className='text-center space-y-4'>
+            <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted'>
+              <Icons.mapPin className='h-6 w-6 text-muted-foreground' />
+            </div>
 
-    <div className="text-lg font-semibold">
-      No trips yet
-    </div>
+            <div className='text-lg font-semibold'>No trips yet</div>
 
-    <div className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
-      Start planning your first journey. Your trips will appear here once created.
-    </div>
-  </div>
+            <div className='text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed'>
+              Start planning your first journey. Your trips will appear here once created.
+            </div>
+          </div>
 
-  <div className="flex flex-col items-center gap-4 mt-6">
-    <Button
-      className="gap-2 px-6"
-      onClick={() => setIsOpen(true)}
-    >
-      <Icons.add className="h-4 w-4" />
-      Create Trip
-    </Button>
-  </div>
-</div>
+          <div className='flex flex-col items-center gap-4 mt-6'>
+            <Button className='gap-2 px-6' onClick={() => setIsOpen(true)}>
+              <Icons.add className='h-4 w-4' />
+              Create Trip
+            </Button>
+          </div>
+        </div>
       )}
 
       {trips.length > 0 ? (

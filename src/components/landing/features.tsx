@@ -8,26 +8,22 @@ const features = [
   {
     icon: Icons.sparkles,
     title: 'AI-Powered Planning',
-    description:
-      'Tell us your preferences and get a smart, personalized itinerary in moments.'
+    description: 'Tell us your preferences and get a smart, personalized itinerary in moments.'
   },
   {
     icon: Icons.compass,
     title: 'Interactive Maps',
-    description:
-      'Visualize your day with synced list and map views. Navigate with ease.'
+    description: 'Visualize your day with synced list and map views. Navigate with ease.'
   },
   {
     icon: Icons.calendar,
     title: 'Live Guidance',
-    description:
-      'Your plan comes alive with calendar sync and location-based prompts.'
+    description: 'Your plan comes alive with calendar sync and location-based prompts.'
   },
   {
     icon: Icons.wallet,
     title: 'Rewards & Perks',
-    description:
-      'Earn coins, unlock perks, and level up as you explore and complete stops.'
+    description: 'Earn coins, unlock perks, and level up as you explore and complete stops.'
   }
 ];
 
@@ -58,15 +54,11 @@ export default function FeaturesSection() {
             Everything you need to travel better
           </h2>
           <p className='mt-3 text-sm text-muted-foreground sm:text-base'>
-            Intelligent tools that transform how you plan, navigate, and experience
-            every journey.
+            Intelligent tools that transform how you plan, navigate, and experience every journey.
           </p>
         </motion.div>
 
-        <div
-          ref={ref}
-          className='mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4'
-        >
+        <div ref={ref} className='mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -79,9 +71,7 @@ export default function FeaturesSection() {
               <div className='flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15'>
                 <feature.icon className='size-6' />
               </div>
-              <h3 className='mt-5 text-base font-semibold text-foreground'>
-                {feature.title}
-              </h3>
+              <h3 className='mt-5 text-base font-semibold text-foreground'>{feature.title}</h3>
               <p className='mt-2 text-sm leading-relaxed text-muted-foreground'>
                 {feature.description}
               </p>

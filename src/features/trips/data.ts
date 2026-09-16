@@ -10,8 +10,7 @@ export interface TripListItem {
   places: Place[];
 }
 
-export const trips: TripListItem[] = [
-];
+export const trips: TripListItem[] = [];
 
 export function getTripById(id: string) {
   return trips.find((trip) => trip.id === id);

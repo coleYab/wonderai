@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import type { FeatureCollection, LineString } from "geojson";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useEffect, useRef, useState } from 'react';
+import type { FeatureCollection, LineString } from 'geojson';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 export type Place = {
   name: string;
@@ -26,13 +26,13 @@ type MapProps = {
   preferRoadRoute: boolean;
 };
 
-const ROUTE_SOURCE_ID = "user-to-destination-route-source";
-const ROUTE_LAYER_ID = "user-to-destination-route-layer";
+const ROUTE_SOURCE_ID = 'user-to-destination-route-source';
+const ROUTE_LAYER_ID = 'user-to-destination-route-layer';
 
 type RouteInfo = {
   distanceKm: number;
   durationMinutes: number;
-  mode: "road" | "direct";
+  mode: 'road' | 'direct';
 };
 
 function haversineKm(from: [number, number], to: [number, number]): number {
@@ -46,10 +46,7 @@ function haversineKm(from: [number, number], to: [number, number]): number {
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return earthRadiusKm * c;
@@ -59,13 +56,10 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const popupsRef = useRef<mapboxgl.Popup[]>([]);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null,
-  );
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
 
-  const mapboxToken =
-    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ;
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   const flyToPlace = (lng: number, lat: number) => {
     mapRef.current?.flyTo({
@@ -76,9 +70,8 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
       duration: 4200,
       curve: 1.2,
       speed: 0.45,
-      easing: (t) =>
-        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
-      essential: true,
+      easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+      essential: true
     });
   };
 
@@ -95,8 +88,8 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 30000,
-      },
+        maximumAge: 30000
+      }
     );
   }, []);
 
@@ -107,67 +100,67 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
 
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/standard",
+      style: 'mapbox://styles/mapbox/standard',
       center: [38.7578, 9.032],
       zoom: 17,
       pitch: 60,
       bearing: 45,
-      antialias: true,
+      antialias: true
     });
 
-    mapRef.current.on("style.load", () => {
+    mapRef.current.on('style.load', () => {
       const map = mapRef.current;
       if (!map) return;
 
-      if (!map.getSource("mapbox-dem")) {
-        map.addSource("mapbox-dem", {
-          type: "raster-dem",
-          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+      if (!map.getSource('mapbox-dem')) {
+        map.addSource('mapbox-dem', {
+          type: 'raster-dem',
+          url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
           tileSize: 512,
-          maxzoom: 14,
+          maxzoom: 14
         });
       }
 
-      map.setTerrain({ source: "mapbox-dem", exaggeration: 1.5 });
+      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
 
-      if (!map.getLayer("buildings-3d-colored") && map.getSource("composite")) {
+      if (!map.getLayer('buildings-3d-colored') && map.getSource('composite')) {
         const firstLabelLayerId = map
           .getStyle()
           .layers?.find(
             (layer) =>
-              layer.type === "symbol" &&
-              typeof layer.layout !== "undefined" &&
-              "text-field" in layer.layout,
+              layer.type === 'symbol' &&
+              typeof layer.layout !== 'undefined' &&
+              'text-field' in layer.layout
           )?.id;
 
         map.addLayer(
           {
-            id: "buildings-3d-colored",
-            source: "composite",
-            "source-layer": "building",
-            filter: ["==", "extrude", "true"],
-            type: "fill-extrusion",
+            id: 'buildings-3d-colored',
+            source: 'composite',
+            'source-layer': 'building',
+            filter: ['==', 'extrude', 'true'],
+            type: 'fill-extrusion',
             minzoom: 14,
             paint: {
-              "fill-extrusion-color": [
-                "interpolate",
-                ["linear"],
-                ["coalesce", ["get", "height"], 0],
+              'fill-extrusion-color': [
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['get', 'height'], 0],
                 0,
-                "#7dd3fc",
+                '#7dd3fc',
                 40,
-                "#22d3ee",
+                '#22d3ee',
                 100,
-                "#f59e0b",
+                '#f59e0b',
                 220,
-                "#ef4444",
+                '#ef4444'
               ],
-              "fill-extrusion-height": ["coalesce", ["get", "height"], 0],
-              "fill-extrusion-base": ["coalesce", ["get", "min_height"], 0],
-              "fill-extrusion-opacity": 0.95,
-            },
+              'fill-extrusion-height': ['coalesce', ['get', 'height'], 0],
+              'fill-extrusion-base': ['coalesce', ['get', 'min_height'], 0],
+              'fill-extrusion-opacity': 0.95
+            }
           },
-          firstLabelLayerId,
+          firstLabelLayerId
         );
       }
     });
@@ -199,11 +192,11 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
         <div style="width: min(72vw, 250px); max-width: 250px; border-radius: 20px; overflow: hidden; font-family: var(--font-geist-sans, Arial, sans-serif); color: #0f172a; background: rgba(255, 255, 255, 0.98); box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18); border: 1px solid rgba(255, 255, 255, 0.75);">
           <div style="position: relative;">
             <img src="${place.image}" alt="${place.name}" style="width: 100%; height: 128px; object-fit: cover; display: block;" />
-            <div style="position: absolute; left: 10px; top: 10px; border-radius: 999px; background: rgba(15, 23, 42, 0.78); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 9px;">${place.category ?? "Stay"}</div>
+            <div style="position: absolute; left: 10px; top: 10px; border-radius: 999px; background: rgba(15, 23, 42, 0.78); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 9px;">${place.category ?? 'Stay'}</div>
           </div>
           <div style="padding: 12px 13px 13px 13px;">
             <div style="font-weight: 700; font-size: 14px; line-height: 1.3; margin-bottom: 4px;">${place.name}</div>
-            <div style="font-size: 12px; color: #475569;">${place.city ?? "Ethiopia"}</div>
+            <div style="font-size: 12px; color: #475569;">${place.city ?? 'Ethiopia'}</div>
           </div>
         </div>
       `;
@@ -212,8 +205,8 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
         offset: 18,
         closeButton: false,
         closeOnClick: false,
-        maxWidth: "300px",
-        className: "place-popup",
+        maxWidth: '300px',
+        className: 'place-popup'
       })
         .setLngLat([place.lng, place.lat])
         .setHTML(popupHtml)
@@ -247,22 +240,22 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
 
     const setRouteData = (
       coordinates: [number, number][],
-      mode: "road" | "direct",
+      mode: 'road' | 'direct',
       distanceKm: number,
-      durationMinutes: number,
+      durationMinutes: number
     ) => {
       const routeGeoJson: FeatureCollection<LineString> = {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: [
           {
-            type: "Feature",
+            type: 'Feature',
             properties: {},
             geometry: {
-              type: "LineString",
-              coordinates,
-            },
-          },
-        ],
+              type: 'LineString',
+              coordinates
+            }
+          }
+        ]
       };
 
       if (map.getSource(ROUTE_SOURCE_ID)) {
@@ -270,43 +263,32 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
         source.setData(routeGeoJson);
       } else {
         map.addSource(ROUTE_SOURCE_ID, {
-          type: "geojson",
-          data: routeGeoJson,
+          type: 'geojson',
+          data: routeGeoJson
         });
       }
 
       if (!map.getLayer(ROUTE_LAYER_ID)) {
         map.addLayer({
           id: ROUTE_LAYER_ID,
-          type: "line",
+          type: 'line',
           source: ROUTE_SOURCE_ID,
           paint: {
-            "line-color": mode === "road" ? "#2563eb" : "#7c3aed",
-            "line-width": 4,
-            "line-opacity": 0.9,
-            "line-dasharray": mode === "road" ? [1, 0] : [2, 1],
-          },
+            'line-color': mode === 'road' ? '#2563eb' : '#7c3aed',
+            'line-width': 4,
+            'line-opacity': 0.9,
+            'line-dasharray': mode === 'road' ? [1, 0] : [2, 1]
+          }
         });
       } else {
-        map.setPaintProperty(
-          ROUTE_LAYER_ID,
-          "line-color",
-          mode === "road" ? "#2563eb" : "#7c3aed",
-        );
-        map.setPaintProperty(
-          ROUTE_LAYER_ID,
-          "line-dasharray",
-          mode === "road" ? [1, 0] : [2, 1],
-        );
+        map.setPaintProperty(ROUTE_LAYER_ID, 'line-color', mode === 'road' ? '#2563eb' : '#7c3aed');
+        map.setPaintProperty(ROUTE_LAYER_ID, 'line-dasharray', mode === 'road' ? [1, 0] : [2, 1]);
       }
 
       setRouteInfo({ distanceKm, durationMinutes, mode });
     };
 
-    const directDistanceKm = haversineKm(userLocation, [
-      selectedPlace.lng,
-      selectedPlace.lat,
-    ]);
+    const directDistanceKm = haversineKm(userLocation, [selectedPlace.lng, selectedPlace.lat]);
 
     let cancelled = false;
 
@@ -315,11 +297,11 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
         setRouteData(
           [
             [userLocation[0], userLocation[1]],
-            [selectedPlace.lng, selectedPlace.lat],
+            [selectedPlace.lng, selectedPlace.lat]
           ],
-          "direct",
+          'direct',
           directDistanceKm,
-          (directDistanceKm / 55) * 60,
+          (directDistanceKm / 55) * 60
         );
         return;
       }
@@ -332,7 +314,7 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
 
         const response = await fetch(directionsUrl);
         if (!response.ok) {
-          throw new Error("Directions API request failed");
+          throw new Error('Directions API request failed');
         }
 
         const data = (await response.json()) as {
@@ -350,9 +332,9 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
 
         setRouteData(
           bestRoute.geometry.coordinates,
-          "road",
+          'road',
           bestRoute.distance / 1000,
-          bestRoute.duration / 60,
+          bestRoute.duration / 60
         );
       } catch {
         if (cancelled) return;
@@ -360,11 +342,11 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
         setRouteData(
           [
             [userLocation[0], userLocation[1]],
-            [selectedPlace.lng, selectedPlace.lat],
+            [selectedPlace.lng, selectedPlace.lat]
           ],
-          "direct",
+          'direct',
           directDistanceKm,
-          (directDistanceKm / 55) * 60,
+          (directDistanceKm / 55) * 60
         );
       }
     };
@@ -377,27 +359,21 @@ function Map({ places, selectedPlace, showRoute, preferRoadRoute }: MapProps) {
   }, [selectedPlace, showRoute, userLocation, preferRoadRoute, mapboxToken]);
 
   return (
-    <div className="relative h-full w-full">
-      <div
-        id="map-container"
-        ref={mapContainerRef}
-        style={{ width: "100%", height: "100%" }}
-      />
+    <div className='relative h-full w-full'>
+      <div id='map-container' ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
       {showRoute && selectedPlace && routeInfo ? (
-        <div className="absolute left-4 top-4 z-10 max-w-[220px] rounded-[18px] border border-white/70 bg-white/90 px-3 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md md:left-auto md:right-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+        <div className='absolute left-4 top-4 z-10 max-w-[220px] rounded-[18px] border border-white/70 bg-white/90 px-3 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md md:left-auto md:right-4'>
+          <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600'>
             Route Summary
           </p>
-          <p className="mt-1 text-xs text-slate-600">
-            Mode: {routeInfo.mode === "road" ? "Road" : "Direct"}
+          <p className='mt-1 text-xs text-slate-600'>
+            Mode: {routeInfo.mode === 'road' ? 'Road' : 'Direct'}
           </p>
-          <p className="mt-1 text-sm font-medium text-slate-900">
+          <p className='mt-1 text-sm font-medium text-slate-900'>
             {routeInfo.distanceKm.toFixed(1)} km
           </p>
-          <p className="text-xs text-slate-600">
-            ETA: {Math.round(routeInfo.durationMinutes)} min
-          </p>
+          <p className='text-xs text-slate-600'>ETA: {Math.round(routeInfo.durationMinutes)} min</p>
         </div>
       ) : null}
     </div>

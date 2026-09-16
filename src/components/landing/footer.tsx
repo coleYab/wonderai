@@ -21,9 +21,7 @@ export default function Footer() {
           height={32}
           className='size-8 object-contain'
         />
-        <span className='text-lg font-semibold tracking-tight text-foreground'>
-          Wonder AI
-        </span>
+        <span className='text-lg font-semibold tracking-tight text-foreground'>Wonder AI</span>
       </Link>
       <p className='mt-4 text-center'>
         Copyright &copy; {new Date().getFullYear()} All rights reserved.

@@ -5,7 +5,7 @@ import {
   GOOGLE_CALENDAR_ACCESS_TOKEN_COOKIE,
   GOOGLE_CALENDAR_EXPIRES_AT_COOKIE,
   GOOGLE_CALENDAR_REFRESH_TOKEN_COOKIE,
-  getGoogleOAuthClient,
+  getGoogleOAuthClient
 } from '../../../google-calendar/oauth/_lib';
 
 const CALENDAR_TIME_ZONE = process.env.GOOGLE_CALENDAR_TIME_ZONE || 'Africa/Addis_Ababa';
@@ -81,10 +81,7 @@ export async function POST(request: NextRequest) {
     const parsed = exportRequestSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid calendar export payload.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid calendar export payload.' }, { status: 400 });
     }
 
     const auth = getCalendarClient(request);

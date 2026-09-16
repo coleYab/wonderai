@@ -1,8 +1,8 @@
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { Suspense } from "react";
-import { getQueryClient } from "@/lib/query-client";
-import { tripsQueryOptions } from "../api/queries";
-import { TripsGrid, TripsGridSkeleton } from "./trip-grid";
+import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { Suspense } from 'react';
+import { getQueryClient } from '@/lib/query-client';
+import { tripsQueryOptions } from '../api/queries';
+import { TripsGrid, TripsGridSkeleton } from './trip-grid';
 
 export default function TripListingPage() {
   const queryClient = getQueryClient();

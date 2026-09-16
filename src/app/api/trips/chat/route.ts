@@ -139,7 +139,9 @@ function ensureRange(startTime: string, endTime: string) {
 }
 
 function findPlaceIndex(places: TripPlace[], targetName: string): number {
-  const exactIndex = places.findIndex((place) => place.name.toLowerCase() === targetName.toLowerCase());
+  const exactIndex = places.findIndex(
+    (place) => place.name.toLowerCase() === targetName.toLowerCase()
+  );
   if (exactIndex >= 0) return exactIndex;
 
   return places.findIndex((place) => {
@@ -184,8 +186,7 @@ function createAddedPlace(operation: PlaceOperation, anchor: TripPlace, index: n
     category: operation.category?.trim() || 'activity',
     lng: Number((anchor.lng + 0.014 * (index + 1)).toFixed(6)),
     lat: Number((anchor.lat + 0.008 * (index + 1)).toFixed(6)),
-    image:
-      imageByCategory[(operation.category || 'activity').toLowerCase()] || anchor.image,
+    image: imageByCategory[(operation.category || 'activity').toLowerCase()] || anchor.image,
     day: sanitizeDay(operation.day, anchor.day || 'Mon'),
     date: sanitizeDate(operation.date, anchor.date || '2026-04-10'),
     startTime: range.startTime,
@@ -239,13 +240,12 @@ function applyPendingAction(places: TripPlace[], pendingAction: PendingAction): 
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY || '';
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Missing GEMINI_API_KEY on server environment.' },
-        { status: 500 }
-      );
-    }
+    const apiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_GENAI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      '';
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
     const body = (await request.json()) as ChatRequestBody;
     const query = body.query?.trim() || '';
@@ -263,7 +263,7 @@ export async function POST(request: Request) {
             ? 'Deleted the selected place(s) from your trip.'
             : pendingAction.action_type === 'add'
               ? 'Added the requested place(s) to your trip.'
-            : 'Applied your requested updates to the trip.',
+              : 'Applied your requested updates to the trip.',
         needs_confirmation: false,
         pending_action: null,
         places: nextPlaces
@@ -271,46 +271,118 @@ export async function POST(request: Request) {
     }
 
     if (!query || places.length === 0) {
-      return NextResponse.json(
-        { error: 'Missing query or places payload.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing query or places payload.' }, { status: 400 });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    let parsed: ChatResponsePayload | null = null;
 
-    const prompt = `You are a trip operations assistant.
+    if (apiKey) {
+      try {
+        const ai = new GoogleGenAI({ apiKey });
+
+        const prompt = `You are a trip operations assistant.
 User request: ${query}
 Tagged place (if any): ${taggedPlaceName || 'None'}
 
 Current places:
 ${JSON.stringify(places)}
 
-  Return concise assistant_message, needs_confirmation, action_type, summary, and updates.
+Return concise assistant_message, needs_confirmation, action_type, summary, and updates.
 Rules:
-  - If the request updates, moves, renames, reschedules, adds, or deletes place(s), set needs_confirmation to true.
-  - If the request is informational only, set action_type to none and needs_confirmation to false.
-  - When deleting, set action_type to delete and use delete operations.
-  - When adding a new event, set action_type to add and use add operations with name, city, category, day, date, startTime, and endTime.
-  - When changing any place detail, set action_type to update and include only required field changes.
-  - Use target_name that exists in current places.
-  - For durations, adjust startTime/endTime.
-  - Use day in Mon..Sun.
-  - Use date format YYYY-MM-DD.
-  - Use time format HH:mm (24h).
-  - Never remove coordinates/image fields.
-`;
+- If the request updates, moves, renames, reschedules, adds, or deletes place(s), set needs_confirmation to true.
+- If the request is informational only, set action_type to none and needs_confirmation to false.
+- When deleting, set action_type to delete and use delete operations.
+- When adding a new event, set action_type to add and use add operations with name, city, category, day, date, startTime, and endTime.
+- When changing any place detail, set action_type to update and include only required field changes.
+- Use target_name that exists in current places.
+- For durations, adjust startTime/endTime.
+- Use day in Mon..Sun.
+- Use date format YYYY-MM-DD.
+- Use time format HH:mm (24h).
+- Never remove coordinates/image fields.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: CHAT_UPDATE_SCHEMA
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: CHAT_UPDATE_SCHEMA
+          }
+        });
+
+        let rawText = response.text || '';
+        rawText = rawText
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+
+        if (rawText) {
+          parsed = JSON.parse(rawText) as ChatResponsePayload;
+        }
+      } catch (geminiError) {
+        console.warn(
+          'Gemini chat API call failed, falling back to local action processor:',
+          geminiError
+        );
       }
-    });
+    }
 
-    const parsed = JSON.parse(response.text || '{}') as ChatResponsePayload;
+    // Local heuristic fallback if Gemini is not configured or failed
+    if (!parsed) {
+      const lowerQuery = query.toLowerCase();
+      const isDelete =
+        lowerQuery.includes('delete') ||
+        lowerQuery.includes('remove') ||
+        lowerQuery.includes('drop');
+      const isAdd =
+        lowerQuery.includes('add') ||
+        lowerQuery.includes('insert') ||
+        lowerQuery.includes('include');
+
+      if (isDelete) {
+        const matchedPlace = places.find(
+          (p) =>
+            lowerQuery.includes(p.name.toLowerCase()) ||
+            (taggedPlaceName && p.name.toLowerCase() === taggedPlaceName.toLowerCase())
+        );
+
+        if (matchedPlace) {
+          return NextResponse.json({
+            assistant_message: `I found a request to delete "${matchedPlace.name}". Would you like me to remove it?`,
+            needs_confirmation: true,
+            pending_action: {
+              action_type: 'delete',
+              summary: `Remove "${matchedPlace.name}" from your itinerary.`,
+              operations: [
+                {
+                  target_name: matchedPlace.name,
+                  action: 'delete'
+                }
+              ]
+            },
+            places: sortPlacesByTimeline(places)
+          } satisfies ChatResponsePayload);
+        }
+      }
+
+      if (isAdd) {
+        return NextResponse.json({
+          assistant_message: `I can help you add a new event to your trip. What activity and time would you prefer?`,
+          needs_confirmation: false,
+          pending_action: null,
+          places: sortPlacesByTimeline(places)
+        } satisfies ChatResponsePayload);
+      }
+
+      return NextResponse.json({
+        assistant_message: `I am your Kuriftu trip concierge. You can ask me to reschedule, add, or remove activities from your itinerary.`,
+        needs_confirmation: false,
+        pending_action: null,
+        places: sortPlacesByTimeline(places)
+      } satisfies ChatResponsePayload);
+    }
+
     const updates = Array.isArray(parsed.updates) ? parsed.updates : [];
     const pending: PendingAction = {
       action_type: parsed.action_type || 'none',

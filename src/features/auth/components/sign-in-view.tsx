@@ -27,13 +27,21 @@ export default function SignInViewPage() {
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,theme(colors.primary/12),transparent_36%),radial-gradient(circle_at_bottom_right,theme(colors.accent/10),transparent_32%),linear-gradient(180deg,theme(colors.background),theme(colors.muted/25))]' />
         <div className='absolute inset-0 opacity-50 [background-image:linear-gradient(to_right,theme(colors.border)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border)_1px,transparent_1px)] [background-size:42px_42px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]' />
         <div className='relative z-20 flex items-center text-lg font-medium'>
-  <img src='/icon.png' alt='Wonder AI' width={28} height={28} className='size-7 mx-5 object-contain' />
-  Wonder AI
-</div>
+          <img
+            src='/icon.png'
+            alt='Wonder AI'
+            width={28}
+            height={28}
+            className='size-7 mx-5 object-contain'
+          />
+          Wonder AI
+        </div>
         <div className='relative z-20 flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center'>
           <div className='space-y-2'>
             <p className='text-3xl font-semibold tracking-tight'>Welcome back</p>
-            <p className='text-sm text-muted-foreground'>Pick up your travel planning where you left off.</p>
+            <p className='text-sm text-muted-foreground'>
+              Pick up your travel planning where you left off.
+            </p>
           </div>
           <TravellerAnimation className='max-w-[30rem]' />
         </div>

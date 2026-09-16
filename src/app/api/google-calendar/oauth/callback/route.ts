@@ -6,7 +6,7 @@ import {
   GOOGLE_CALENDAR_RETURN_TO_COOKIE,
   GOOGLE_CALENDAR_STATE_COOKIE,
   getGoogleOAuthClient,
-  getSafeReturnTo,
+  getSafeReturnTo
 } from '../_lib';
 
 function clearHandshakeCookies(response: NextResponse) {
@@ -39,7 +39,9 @@ export async function GET(request: NextRequest) {
   const state = request.nextUrl.searchParams.get('state');
   const error = request.nextUrl.searchParams.get('error');
   const expectedState = request.cookies.get(GOOGLE_CALENDAR_STATE_COOKIE)?.value || '';
-  const returnTo = getSafeReturnTo(request.cookies.get(GOOGLE_CALENDAR_RETURN_TO_COOKIE)?.value || null);
+  const returnTo = getSafeReturnTo(
+    request.cookies.get(GOOGLE_CALENDAR_RETURN_TO_COOKIE)?.value || null
+  );
 
   if (error) {
     const redirectUrl = new URL(returnTo, request.url);
@@ -50,10 +52,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!code || !state || !expectedState || state !== expectedState) {
-    return NextResponse.json(
-      { error: 'Invalid Google OAuth callback state.' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid Google OAuth callback state.' }, { status: 400 });
   }
 
   const { tokens } = await oauthClient.getToken(code);
@@ -77,7 +76,7 @@ export async function GET(request: NextRequest) {
     response.cookies.set(
       GOOGLE_CALENDAR_EXPIRES_AT_COOKIE,
       String(tokens.expiry_date),
-      cookieOptions,
+      cookieOptions
     );
   }
 

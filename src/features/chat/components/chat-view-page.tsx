@@ -346,7 +346,11 @@ export default function ChatViewPage() {
           </ScrollArea>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className='mx-auto mt-3 flex w-full max-w-3xl gap-2 pb-2'>
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className='mx-auto mt-3 flex w-full max-w-3xl gap-2 pb-2'
+        >
           <Textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -365,7 +369,11 @@ export default function ChatViewPage() {
             aria-label='Send message'
             className='bg-primary text-primary-foreground flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40'
           >
-            {isLoading ? <Icons.spinner className='size-4 animate-spin' /> : <Icons.send className='size-4' />}
+            {isLoading ? (
+              <Icons.spinner className='size-4 animate-spin' />
+            ) : (
+              <Icons.send className='size-4' />
+            )}
           </button>
         </form>
       </div>

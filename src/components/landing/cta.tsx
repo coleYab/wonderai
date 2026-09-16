@@ -21,8 +21,8 @@ export default function CTASection() {
           Ready to transform your travel experience?
         </h2>
         <p className='mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base'>
-          Start planning your next adventure with an AI companion that understands
-          your preferences and guides you every step of the way.
+          Start planning your next adventure with an AI companion that understands your preferences
+          and guides you every step of the way.
         </p>
         <motion.div
           initial={{ opacity: 0, y: 10 }}

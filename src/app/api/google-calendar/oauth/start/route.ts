@@ -4,7 +4,7 @@ import {
   GOOGLE_CALENDAR_SCOPES,
   GOOGLE_CALENDAR_STATE_COOKIE,
   getGoogleOAuthClient,
-  getSafeReturnTo,
+  getSafeReturnTo
 } from '../_lib';
 
 export async function GET(request: NextRequest) {

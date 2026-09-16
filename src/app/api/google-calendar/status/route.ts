@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   GOOGLE_CALENDAR_ACCESS_TOKEN_COOKIE,
   GOOGLE_CALENDAR_EXPIRES_AT_COOKIE,
-  GOOGLE_CALENDAR_REFRESH_TOKEN_COOKIE,
+  GOOGLE_CALENDAR_REFRESH_TOKEN_COOKIE
 } from '../oauth/_lib';
 
 export async function GET(request: NextRequest) {

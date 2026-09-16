@@ -13,8 +13,6 @@ type ChatbotRequestBody = {
   tourContext?: string;
 };
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
-
 const DEFAULT_PROMPT_DATA = `
 You are the AI chatbot assistant for a travel dashboard application.
 
@@ -39,13 +37,12 @@ function toTranscript(history: ChatMessage[]): string {
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY || '';
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Missing GEMINI_API_KEY on server environment.' },
-        { status: 500 }
-      );
-    }
+    const apiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_GENAI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      '';
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
     const body = (await request.json()) as ChatbotRequestBody;
     const message = body.message?.trim() || '';
@@ -78,35 +75,62 @@ User: ${message}
 Respond as Assistant in Markdown.
 `;
 
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContentStream({
-      model: GEMINI_MODEL,
-      contents: prompt
-    });
-
     const encoder = new TextEncoder();
+
+    if (apiKey) {
+      try {
+        const ai = new GoogleGenAI({ apiKey });
+        const response = await ai.models.generateContentStream({
+          model: modelName,
+          contents: prompt
+        });
+
+        const stream = new ReadableStream<Uint8Array>({
+          async start(controller) {
+            try {
+              let hasContent = false;
+
+              for await (const chunk of response) {
+                const textChunk = chunk.text || '';
+                if (!textChunk) continue;
+
+                hasContent = true;
+                controller.enqueue(encoder.encode(textChunk));
+              }
+
+              if (!hasContent) {
+                controller.enqueue(encoder.encode('I could not generate a response right now.'));
+              }
+
+              controller.close();
+            } catch (error) {
+              console.error('Failed while streaming chatbot response:', error);
+              controller.error(error);
+            }
+          }
+        });
+
+        return new Response(stream, {
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'no-cache, no-transform',
+            Connection: 'keep-alive'
+          }
+        });
+      } catch (geminiError) {
+        console.warn(
+          'Gemini chatbot streaming failed, falling back to assistant reply:',
+          geminiError
+        );
+      }
+    }
+
+    // Fallback stream when API key is missing or call fails
+    const fallbackText = `I am your Kuriftu Resort & Spa AI assistant. How can I help you plan your itinerary, explore amenities, or navigate the dashboard?`;
     const stream = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          let hasContent = false;
-
-          for await (const chunk of response) {
-            const textChunk = chunk.text || '';
-            if (!textChunk) continue;
-
-            hasContent = true;
-            controller.enqueue(encoder.encode(textChunk));
-          }
-
-          if (!hasContent) {
-            controller.enqueue(encoder.encode('I could not generate a response right now.'));
-          }
-
-          controller.close();
-        } catch (error) {
-          console.error('Failed while streaming chatbot response:', error);
-          controller.error(error);
-        }
+      start(controller) {
+        controller.enqueue(encoder.encode(fallbackText));
+        controller.close();
       }
     });
 
